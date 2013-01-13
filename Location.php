@@ -3,17 +3,27 @@
 class Location {
 
     public $coordinates;
-    public $geocode_response = null;
     public $geocode_response_raw;
     public $location;
 
-    public function __construct($location) {
-        $this->location = $location;
-        $this->geocode($location);
-        $this->coordinates = new Coordinates(
-            $this->geocode_response['results'][0]['geometry']['location']['lat'],
-            $this->geocode_response['results'][0]['geometry']['location']['lng']
-        );
+    private $geocode_response = null;
+
+    public function __construct($location = null, $geocode_response_raw = null, $latitude = null, $longitude = null) {
+        if(isset($location)) {
+            $this->location = $location;
+
+            if(isset($geocode_response_raw) && isset($latitude) && isset($longitude)) {
+                $this->geocode_response_raw = $geocode_response_raw;
+                $this->geocode_response = json_decode($this->geocode_response_raw, true);
+                $this->coordinates = new Coordinates($latitude, $longitude);
+            } else {
+                $this->geocode($location);
+                $this->coordinates = new Coordinates(
+                    $this->geocode_response['results'][0]['geometry']['location']['lat'],
+                    $this->geocode_response['results'][0]['geometry']['location']['lng']
+                );
+            }
+        }
     }
 
     private function geocode() {
